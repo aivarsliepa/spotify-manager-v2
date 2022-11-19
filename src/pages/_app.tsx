@@ -6,6 +6,7 @@ import { trpc } from "../utils/trpc";
 
 import "../styles/globals.css";
 import Head from "next/head";
+import Layout from "../components/Layout";
 
 const MyApp: AppType<{ session: Session | null }> = ({
   Component,
@@ -18,7 +19,9 @@ const MyApp: AppType<{ session: Session | null }> = ({
         <meta name="description" content="Spotify manager" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <Component {...pageProps} />
+      <Layout>
+        <Component {...pageProps} />
+      </Layout>
     </SessionProvider>
   );
 };

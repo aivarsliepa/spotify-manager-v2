@@ -29,8 +29,8 @@ CREATE TABLE "Session" (
 -- CreateTable
 CREATE TABLE "User" (
     "id" TEXT NOT NULL,
-    "name" TEXT,
     "email" TEXT,
+    "name" TEXT,
     "emailVerified" TIMESTAMP(3),
     "image" TEXT,
 
@@ -46,14 +46,13 @@ CREATE TABLE "VerificationToken" (
 
 -- CreateTable
 CREATE TABLE "Song" (
-    "id" TEXT NOT NULL,
-    "image" TEXT NOT NULL,
     "spotifyId" TEXT NOT NULL,
-    "artists" TEXT[],
-    "name" TEXT NOT NULL,
+    "image" TEXT NOT NULL,
     "uri" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "artists" TEXT[],
 
-    CONSTRAINT "Song_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "Song_pkey" PRIMARY KEY ("spotifyId")
 );
 
 -- CreateTable
@@ -66,23 +65,23 @@ CREATE TABLE "Label" (
 );
 
 -- CreateTable
-CREATE TABLE "SongsToUsers" (
+CREATE TABLE "SongsOnUsers" (
+    "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
-    "songId" TEXT NOT NULL,
+    "songSpotifyId" TEXT NOT NULL,
     "isSaved" BOOLEAN NOT NULL,
 
-    CONSTRAINT "SongsToUsers_pkey" PRIMARY KEY ("userId","songId")
+    CONSTRAINT "SongsOnUsers_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "Playlist" (
-    "id" TEXT NOT NULL,
     "spotifyId" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "image" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
 
-    CONSTRAINT "Playlist_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "Playlist_pkey" PRIMARY KEY ("spotifyId")
 );
 
 -- CreateTable
@@ -113,10 +112,10 @@ CREATE UNIQUE INDEX "VerificationToken_token_key" ON "VerificationToken"("token"
 CREATE UNIQUE INDEX "VerificationToken_identifier_token_key" ON "VerificationToken"("identifier", "token");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Song_spotifyId_key" ON "Song"("spotifyId");
+CREATE UNIQUE INDEX "Label_name_userId_key" ON "Label"("name", "userId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Playlist_spotifyId_key" ON "Playlist"("spotifyId");
+CREATE UNIQUE INDEX "SongsOnUsers_userId_songSpotifyId_key" ON "SongsOnUsers"("userId", "songSpotifyId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "_LabelToSong_AB_unique" ON "_LabelToSong"("A", "B");
@@ -140,10 +139,10 @@ ALTER TABLE "Session" ADD CONSTRAINT "Session_userId_fkey" FOREIGN KEY ("userId"
 ALTER TABLE "Label" ADD CONSTRAINT "Label_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "SongsToUsers" ADD CONSTRAINT "SongsToUsers_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "SongsOnUsers" ADD CONSTRAINT "SongsOnUsers_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "SongsToUsers" ADD CONSTRAINT "SongsToUsers_songId_fkey" FOREIGN KEY ("songId") REFERENCES "Song"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "SongsOnUsers" ADD CONSTRAINT "SongsOnUsers_songSpotifyId_fkey" FOREIGN KEY ("songSpotifyId") REFERENCES "Song"("spotifyId") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Playlist" ADD CONSTRAINT "Playlist_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -152,10 +151,10 @@ ALTER TABLE "Playlist" ADD CONSTRAINT "Playlist_userId_fkey" FOREIGN KEY ("userI
 ALTER TABLE "_LabelToSong" ADD CONSTRAINT "_LabelToSong_A_fkey" FOREIGN KEY ("A") REFERENCES "Label"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "_LabelToSong" ADD CONSTRAINT "_LabelToSong_B_fkey" FOREIGN KEY ("B") REFERENCES "Song"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "_LabelToSong" ADD CONSTRAINT "_LabelToSong_B_fkey" FOREIGN KEY ("B") REFERENCES "Song"("spotifyId") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "_PlaylistToSong" ADD CONSTRAINT "_PlaylistToSong_A_fkey" FOREIGN KEY ("A") REFERENCES "Playlist"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "_PlaylistToSong" ADD CONSTRAINT "_PlaylistToSong_A_fkey" FOREIGN KEY ("A") REFERENCES "Playlist"("spotifyId") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "_PlaylistToSong" ADD CONSTRAINT "_PlaylistToSong_B_fkey" FOREIGN KEY ("B") REFERENCES "Song"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "_PlaylistToSong" ADD CONSTRAINT "_PlaylistToSong_B_fkey" FOREIGN KEY ("B") REFERENCES "Song"("spotifyId") ON DELETE CASCADE ON UPDATE CASCADE;

@@ -42,14 +42,14 @@ model Session {
 }
 
 model User {
-  id            String    @id @default(cuid())
+  id            String         @id @default(cuid())
+  email         String?        @unique
   name          String?
-  email         String?   @unique
   emailVerified DateTime?
   image         String?
   accounts      Account[]
   sessions      Session[]
-  songs         SongsToUsers[]
+  songs         SongsOnUsers[]
   labels        Label[]
   playlists     Playlist[]
 }
@@ -62,47 +62,47 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-
 // custom types
 model Song {
-  id            String    @id @default(cuid())
-  image String
-  spotifyId String @unique
-  users SongsToUsers[]
-  labels Label[]
+  spotifyId String         @id
+  image     String
+  uri       String // used for playing song
+  name      String
+  artists   String[]
+
+  users     SongsOnUsers[]
+  labels    Label[]
   playlists Playlist[]
-  artists String[]
-  name String
-  uri String // used for playing song
 }
 
 model Label {
-  id            String    @id @default(cuid())
-  name String
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id     String @id @default(cuid())
+  name   String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId String
-  songs Song[]
+  songs  Song[]
+
+  @@unique([name, userId])
 }
 
-model SongsToUsers {
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId String
-  song Song @relation(fields: [songId], references: [id], onDelete: Cascade)
-  songId String
-  
+model SongsOnUsers {
+  id            String @id @default(cuid())
+  user          User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId        String
+  song          Song   @relation(fields: [songSpotifyId], references: [spotifyId], onDelete: Cascade)
+  songSpotifyId String
+
   isSaved Boolean
 
-  @@id([userId, songId])
-	@@map("SongsToUsers")
+  @@unique([userId, songSpotifyId])
+  @@map("SongsOnUsers")
 }
 
 model Playlist {
-  id            String    @id @default(cuid())
-  spotifyId String @unique
-  name String
-  image String
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId String
-  songs Song[]
+  spotifyId String @id
+  name      String
+  image     String
+  user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  songs     Song[]
 }
-
