@@ -6,18 +6,12 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   // NOTE: When using postgresql, mysql or sqlserver, uncomment the @db.Text annotations in model Account below
   // Further reading:
   // https://next-auth.js.org/adapters/prisma#create-the-prisma-schema
   // https://www.prisma.io/docs/reference/api-reference/prisma-schema-reference#string
   url      = env("DATABASE_URL")
-}
-
-model Example {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 }
 
 // Necessary for Next auth
@@ -27,12 +21,12 @@ model Account {
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String? // @db.Text
-  access_token      String? // @db.Text
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String? // @db.Text
+  id_token          String? @db.Text
   session_state     String?
   user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -55,6 +49,9 @@ model User {
   image         String?
   accounts      Account[]
   sessions      Session[]
+  songs  SongsToUsers[]
+  labels      Label[]
+  playlists      Playlist[]
 }
 
 model VerificationToken {
@@ -63,4 +60,67 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+
+// custom types
+model Song {
+  id            String    @id @default(cuid())
+  image String
+  spotifyId String @unique
+  users SongsToUsers[]
+  labels SongsToLabels[]
+  playlists PlaylistToSongs[]
+  artists String[]
+  name String
+  uri String // used for playing song
+}
+
+model Label {
+  id            String    @id @default(cuid())
+  name String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  songs SongsToLabels[]
+}
+
+model SongsToUsers {
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  song Song @relation(fields: [songId], references: [id], onDelete: Cascade)
+  songId String
+
+  @@id([userId, songId])
+	@@map("SongsToUsers")
+}
+
+model SongsToLabels {
+  label Label @relation(fields: [labelId], references: [id], onDelete: Cascade)
+  labelId String
+  song Song @relation(fields: [songId], references: [id], onDelete: Cascade)
+  songId String
+  isSaved Boolean
+
+  @@id([labelId, songId])
+	@@map("SongsToLabels")
+}
+
+model Playlist {
+  id            String    @id @default(cuid())
+  spotifyId String @unique
+  name String
+  image String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  songs PlaylistToSongs[]
+}
+
+model PlaylistToSongs {
+  playlist Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+  playlistId String
+  song Song @relation(fields: [songId], references: [id], onDelete: Cascade)
+  songId String
+
+  @@id([playlistId, songId])
+  @@map("PlaylistToSongs")
 }
