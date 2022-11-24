@@ -135,7 +135,7 @@ export async function synchronizeWithSpotify(userId: string) {
   const allSongs = new Map<string, Prisma.SongCreateInput>();
   const playlistSongs = new Map<string, Prisma.SongCreateInput[]>();
 
-  // 1. get all playlists -> store them
+  // 1. get all playlists
   const playlists = await fetchPlaylistData(token);
 
   // 2. get saved tracks

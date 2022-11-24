@@ -4,7 +4,7 @@ import SideNav from "./SideNav";
 
 const Layout = ({ children }: PropsWithChildren) => {
   return (
-    <div className="grid">
+    <div className="grid min-h-screen grid-cols-[256px_1fr] grid-rows-[64px_1fr]">
       <Header></Header>
       <SideNav></SideNav>
       <main>{children}</main>
