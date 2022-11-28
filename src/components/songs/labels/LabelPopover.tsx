@@ -67,7 +67,7 @@ const LabelPicker = ({ selectedLabels, songId }: Props) => {
               }
             }}
           >
-            <input type="checkbox" checked={selectedLabelSet.has(label.id)} />
+            <input type="checkbox" checked={selectedLabelSet.has(label.id)} readOnly />
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-900">{label.name}</p>
             </div>
