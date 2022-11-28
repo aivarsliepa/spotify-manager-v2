@@ -1,11 +1,34 @@
 import { type NextPage } from "next";
+import { useRouter } from "next/router";
+import { memo } from "react";
+import SongLabels from "../../components/songs/SongLabels";
 
 import { trpc } from "../../utils/trpc";
 
 const SongPage: NextPage = () => {
-  // const hello = trpc.example.hello.useQuery({ text: "from tRPC" });
+  const {
+    query: { songId },
+  } = useRouter();
 
-  return <>song details</>;
+  const { data } = trpc.songs.getById.useQuery({ id: songId as string }, { enabled: !!songId });
+
+  if (!data) {
+    return <>Loading...</>;
+  }
+
+  const { song } = data;
+  const artists = song.artists.join(", ");
+
+  return (
+    <div className="flex h-full gap-4">
+      <img src={song.image} alt={song.name} className="h-full object-contain" width={400} height={400} />
+      <div className="self-center">
+        <h4>{song.name}</h4>
+        <h5>{artists}</h5>
+        <SongLabels song={song} labels={song.labels} />
+      </div>
+    </div>
+  );
 };
 
-export default SongPage;
+export default memo(SongPage);

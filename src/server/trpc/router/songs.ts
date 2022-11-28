@@ -17,6 +17,33 @@ export const songsRouter = router({
   //       take: 50,
   //     });
   //   }),
+  getById: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      return ctx.prisma.songsOnUsers.findUnique({
+        where: { userId_songSpotifyId: { userId: ctx.session.user.id, songSpotifyId: input.id } },
+        select: {
+          song: {
+            select: {
+              labels: {
+                where: { userId: ctx.session.user.id },
+              },
+              artists: true,
+              image: true,
+              playlists: true,
+              spotifyId: true,
+              name: true,
+              uri: true,
+            },
+          },
+          isSaved: true,
+        },
+      });
+    }),
   getInfinite: protectedProcedure
     .input(
       z.object({
