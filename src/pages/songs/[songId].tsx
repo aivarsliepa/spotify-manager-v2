@@ -1,7 +1,7 @@
 import { type NextPage } from "next";
 import { useRouter } from "next/router";
 import { memo } from "react";
-import SongLabels from "../../components/songs/SongLabels";
+import SongLabels from "../../components/songs/labels/SongLabels";
 
 import { trpc } from "../../utils/trpc";
 
@@ -12,7 +12,7 @@ const SongPage: NextPage = () => {
 
   const { data } = trpc.songs.getById.useQuery({ id: songId as string }, { enabled: !!songId });
 
-  if (!data) {
+  if (!data || typeof songId !== "string") {
     return <>Loading...</>;
   }
 
@@ -25,7 +25,7 @@ const SongPage: NextPage = () => {
       <div className="self-center">
         <h4>{song.name}</h4>
         <h5>{artists}</h5>
-        <SongLabels song={song} labels={song.labels} />
+        <SongLabels selectedLabels={song.labels} songId={songId} />
       </div>
     </div>
   );
