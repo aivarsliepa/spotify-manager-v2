@@ -6,6 +6,7 @@ import { keyIsNotEmpty } from "../utils/guards";
 import { createUrlWithParams } from "../utils/url";
 
 import { prisma } from "./db/client";
+import { env } from "../env/server.mjs";
 
 const apiConfig = {
   // tracks: "https://api.spotify.com/v1/tracks",
@@ -28,10 +29,31 @@ const apiConfig = {
     params: {
       limit: "100",
       market: "from_token",
-      fields: "total,limit,items(track(images,linked_from,id,name,uri,album(images),artists(name)))",
+      // fields: "total,limit,items(track(images,linked_from,id,name,uri,album(images),artists(name)))",
+      fields: "total,limit,items(track(images,linked_from,id,name,album(images),artists(name)))",
     },
   },
 };
+
+async function refreshToken(refresh_token: string) {
+  const body = new URLSearchParams({
+    grant_type: "refresh_token",
+    refresh_token,
+  });
+  const headers = {
+    Authorization: "Basic " + Buffer.from(env.SPOTIFY_CLIENT_ID + ":" + env.SPOTIFY_CLIENT_SECRET).toString("base64"),
+    "Content-Type": "application/x-www-form-urlencoded",
+  };
+
+  const res = await fetch(apiConfig.token, {
+    method: "POST",
+    headers,
+    body,
+  });
+
+  const { access_token, expires_in } = (await res.json()) as { access_token: string; expires_in: number };
+  return { access_token, expires_in };
+}
 
 async function fetchWithRetry<T>(url: string, token: string): Promise<T> {
   const res = await fetch(url, {
@@ -65,8 +87,17 @@ export async function fetchPlaylistData(token: string) {
   return playlistResponses.map((playlistReponse) => playlistReponse.items.map(spotifyPlaylistToPlaylistInput)).flat();
 }
 
-export async function playSongs(token: string, uris: string[]): Promise<void> {
-  // const res =
+export function trackIdToUri(id: string) {
+  return `spotify:track:${id}`;
+}
+
+export async function playSongs(userId: string, uris: string[]) {
+  const token = await getAccessToken(userId);
+  if (!token) {
+    console.log("playSongs: no token");
+    return;
+  }
+
   await fetch(apiConfig.play, {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -75,11 +106,7 @@ export async function playSongs(token: string, uris: string[]): Promise<void> {
     body: JSON.stringify({ uris }),
   });
 
-  // TODO: error handling !
-  // const resBody = await res.json();
-  // console.log(res.status);
-  // console.log(res.statusText);
-  // console.log(resBody);
+  // todo error handling?
 }
 
 export async function fetchAllFromAPI<T extends { total: number; limit: number }>(
@@ -115,12 +142,25 @@ export async function fetchPlaylistSongsByPlaylistId(token: string, playlistId: 
 }
 
 export async function getAccessToken(userId: string) {
-  const { access_token } = await prisma.account.findFirstOrThrow({
+  const { access_token, expires_at, refresh_token, id } = await prisma.account.findFirstOrThrow({
     where: { userId, provider: "spotify" },
-    select: { access_token: true },
+    select: { access_token: true, expires_at: true, refresh_token: true, id: true },
   });
 
-  return access_token;
+  if ((expires_at ?? 0) * 1000 >= Date.now()) {
+    return access_token;
+  }
+
+  const { access_token: newAccessToken, expires_in } = await refreshToken(refresh_token ?? "");
+  await prisma.account.update({
+    where: { id },
+    data: {
+      access_token: newAccessToken,
+      expires_at: Math.floor(Date.now() / 1000) + expires_in,
+    },
+  });
+
+  return newAccessToken;
 }
 
 // TODO: 1. what if auth token is expires while syncing ?

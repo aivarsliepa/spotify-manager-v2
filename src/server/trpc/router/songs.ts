@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { playSongs, trackIdToUri } from "../../spotify-service";
 
 import { router, protectedProcedure } from "../trpc";
 
@@ -37,7 +38,6 @@ export const songsRouter = router({
               playlists: true,
               spotifyId: true,
               name: true,
-              uri: true,
             },
           },
           isSaved: true,
@@ -81,4 +81,10 @@ export const songsRouter = router({
         nextCursor,
       };
     }),
+  playSongs: protectedProcedure.input(z.array(z.string()).nonempty()).mutation(async ({ ctx, input }) => {
+    await playSongs(
+      ctx.session.user.id,
+      input.map((id) => trackIdToUri(id)),
+    );
+  }),
 });

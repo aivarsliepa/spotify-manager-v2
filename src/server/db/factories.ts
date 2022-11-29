@@ -7,7 +7,7 @@ export const spotifyTrackToSongInput = (track: SpotifyApi.TrackObjectFull): Pris
     artists,
     spotifyId: track.linked_from?.id ?? track.id,
     name: track.name,
-    uri: track.uri,
+    // uri: track.uri,
     image: track.album.images[0]?.url ?? "",
   };
 };
