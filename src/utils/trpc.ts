@@ -15,11 +15,16 @@ export const trpc = createTRPCNext<AppRouter>({
   config() {
     return {
       transformer: superjson,
+      queryClientConfig: {
+        defaultOptions: {
+          queries: {
+            staleTime: 1000 * 60, // 1 minutes
+          },
+        },
+      },
       links: [
         loggerLink({
-          enabled: (opts) =>
-            process.env.NODE_ENV === "development" ||
-            (opts.direction === "down" && opts.result instanceof Error),
+          enabled: (opts) => process.env.NODE_ENV === "development" || (opts.direction === "down" && opts.result instanceof Error),
         }),
         httpBatchLink({
           url: `${getBaseUrl()}/api/trpc`,
