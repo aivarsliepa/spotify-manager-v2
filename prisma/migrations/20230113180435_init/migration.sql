@@ -48,7 +48,6 @@ CREATE TABLE "VerificationToken" (
 CREATE TABLE "Song" (
     "spotifyId" TEXT NOT NULL,
     "image" TEXT NOT NULL,
-    "uri" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "artists" TEXT[],
 
