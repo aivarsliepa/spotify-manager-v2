@@ -22,11 +22,11 @@ const SongLabel = ({ label, songId }: Props) => {
   };
 
   return (
-    <div tabIndex={0} className="flex cursor-pointer gap-2 rounded-3xl border border-black py-1 px-3 hover:bg-slate-300 focus:bg-slate-300">
+    <div tabIndex={0} className="flex cursor-pointer gap-2 rounded-3xl border border-black py-1 px-3 hover:bg-slate-200 focus:bg-slate-200">
       <span>{label.name}</span>
       <XMarkIcon
         tabIndex={0}
-        className="h-5 w-5 self-center rounded-full hover:bg-red-300 focus:bg-red-300"
+        className="h-5 w-5 self-center rounded-full hover:bg-red-200 focus:bg-red-200"
         color="red"
         onClick={onDelete}
         onKeyDown={(e) => {

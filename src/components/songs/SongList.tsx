@@ -2,6 +2,7 @@ import { memo, useMemo } from "react";
 import { trpc } from "../../utils/trpc";
 import OnEntry from "../OnEntry";
 import SongListItem from "./SongListItem";
+import SongsFilter from "./filter/SongsFilter";
 
 const SongList = () => {
   const { data, isLoading, fetchNextPage } = trpc.songs.getInfinite.useInfiniteQuery(
@@ -31,7 +32,12 @@ const SongList = () => {
     return <div>Loading...</div>;
   }
 
-  return <div className="flex flex-col">{songs}</div>;
+  return (
+    <div>
+      <SongsFilter />
+      <div className="flex flex-col">{songs}</div>
+    </div>
+  );
 };
 
 export default memo(SongList);

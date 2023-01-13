@@ -6,7 +6,7 @@ const SongListItem = ({ song }: { song: Song }) => {
   const artists = song.artists.join(", ");
 
   return (
-    <div className="flex h-14 items-center gap-4 py-1 px-4 hover:bg-slate-600">
+    <div className="flex h-14 items-center gap-4 py-1 px-4 hover:bg-slate-200">
       <input type="checkbox" className="self-center" />
       <div className="flex h-full gap-4">
         <img src={song.image} alt={song.name} className="h-full" />

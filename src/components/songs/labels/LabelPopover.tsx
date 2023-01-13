@@ -1,9 +1,9 @@
-import { Popover, Transition } from "@headlessui/react";
 import { PencilSquareIcon, PlusIcon } from "@heroicons/react/20/solid";
-import { memo, useMemo, useState } from "react";
+import { memo, useCallback, useMemo, useState } from "react";
 import type { Label } from "@prisma/client";
-import { Fragment } from "react";
 import { trpc } from "../../../utils/trpc";
+import AppPopover from "../../AppPopover";
+import SelectItem from "../../SelectItem";
 
 type Props = {
   songId: string;
@@ -56,9 +56,8 @@ const LabelPicker = ({ selectedLabels, songId }: Props) => {
       .filter((label) => label.name.includes(labelInputTrimmed))
       .map((label) => {
         return (
-          <div
+          <SelectItem
             key={label.id}
-            className="-m-3 flex cursor-pointer items-center rounded-lg p-2 transition duration-150 ease-in-out hover:bg-gray-50 focus:outline-none focus-visible:ring focus-visible:ring-orange-500 focus-visible:ring-opacity-50"
             onClick={() => {
               if (selectedLabelSet.has(label.id)) {
                 disconnectSong.mutate({ songId, name: label.name });
@@ -71,7 +70,7 @@ const LabelPicker = ({ selectedLabels, songId }: Props) => {
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-900">{label.name}</p>
             </div>
-          </div>
+          </SelectItem>
         );
       });
   }, [connectToSong, data, disconnectSong, labelInputTrimmed, selectedLabelSet, songId]);
@@ -101,28 +100,11 @@ const LabelPicker = ({ selectedLabels, songId }: Props) => {
   );
 };
 
-// TODO: mobile
 const LabelPopover = ({ selectedLabels, songId }: Props) => {
-  return (
-    <Popover className="relative flex">
-      <Popover.Button>
-        <PencilSquareIcon className="h-8 w-8 rounded-full p-1 hover:bg-slate-300 " />
-      </Popover.Button>
-      <Transition
-        as={Fragment}
-        enter="transition ease-out duration-200"
-        enterFrom="opacity-0 translate-y-1"
-        enterTo="opacity-100 translate-y-0"
-        leave="transition ease-in duration-150"
-        leaveFrom="opacity-100 translate-y-0"
-        leaveTo="opacity-0 translate-y-1"
-      >
-        <Popover.Panel className="absolute top-1/2 z-10 mt-3 transform px-4 sm:px-0">
-          <LabelPicker selectedLabels={selectedLabels} songId={songId} />
-        </Popover.Panel>
-      </Transition>
-    </Popover>
-  );
+  const renderButton = useCallback(() => <PencilSquareIcon className="h-8 w-8 rounded-full p-1 hover:bg-slate-300 " />, []);
+  const renderPanel = useCallback(() => <LabelPicker selectedLabels={selectedLabels} songId={songId} />, [selectedLabels, songId]);
+
+  return <AppPopover button={renderButton} panel={renderPanel} />;
 };
 
 export default memo(LabelPopover);
