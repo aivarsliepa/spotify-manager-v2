@@ -47,6 +47,10 @@ export const songsRouter = router({
   getInfinite: protectedProcedure
     .input(
       z.object({
+        labels: z.array(z.string()),
+        playlists: z.array(z.string()),
+        excludeLabels: z.array(z.string()),
+        excludePlaylists: z.array(z.string()),
         limit: z.number().min(1).max(100).nullish(),
         cursor: z.string().nullish(), // <-- "cursor" needs to exist, but can be any type
       }),
@@ -57,7 +61,43 @@ export const songsRouter = router({
 
       const items = await ctx.prisma.songsOnUsers.findMany({
         take: limit + 1, // get an extra item at the end which we'll use as next cursor
-        where: { userId: ctx.session.user.id },
+        where: {
+          userId: ctx.session.user.id,
+          song: {
+            labels: {
+              none: {
+                id: {
+                  in: input.excludeLabels,
+                },
+              },
+              ...(input.labels.length > 0
+                ? {
+                    some: {
+                      id: {
+                        in: input.labels,
+                      },
+                    },
+                  }
+                : {}),
+            },
+            playlists: {
+              none: {
+                spotifyId: {
+                  in: input.excludePlaylists,
+                },
+              },
+              ...(input.playlists.length > 0
+                ? {
+                    some: {
+                      spotifyId: {
+                        in: input.playlists,
+                      },
+                    },
+                  }
+                : {}),
+            },
+          },
+        },
         cursor: cursor
           ? {
               userId_songSpotifyId: {

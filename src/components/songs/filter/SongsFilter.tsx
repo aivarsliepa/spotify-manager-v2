@@ -7,10 +7,10 @@ import FilterPanel from "./FilterPanel";
 const SongsFilter = () => {
   const renderButton = useCallback(
     () => (
-      <button className="flex rounded-md p-2 hover:bg-slate-200">
+      <div className="flex rounded-md p-2 hover:bg-slate-200">
         <FunnelIcon className="h-6 w-6" />
         <span>Filter</span>
-      </button>
+      </div>
     ),
     [],
   );

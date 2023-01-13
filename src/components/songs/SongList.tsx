@@ -3,10 +3,30 @@ import { trpc } from "../../utils/trpc";
 import OnEntry from "../OnEntry";
 import SongListItem from "./SongListItem";
 import SongsFilter from "./filter/SongsFilter";
+import { useRouter } from "next/router";
 
 const SongList = () => {
+  const router = useRouter();
+
+  const labels = router.query.labels ? (Array.isArray(router.query.labels) ? router.query.labels : [router.query.labels]) : [];
+  const excludeLabels = router.query.excludeLabels
+    ? Array.isArray(router.query.excludeLabels)
+      ? router.query.excludeLabels
+      : [router.query.excludeLabels]
+    : [];
+  const playlists = router.query.playlists
+    ? Array.isArray(router.query.playlists)
+      ? router.query.playlists
+      : [router.query.playlists]
+    : [];
+  const excludePlaylists = router.query.excludePlaylists
+    ? Array.isArray(router.query.excludePlaylists)
+      ? router.query.excludePlaylists
+      : [router.query.excludePlaylists]
+    : [];
+
   const { data, isLoading, fetchNextPage } = trpc.songs.getInfinite.useInfiniteQuery(
-    {},
+    { labels, excludeLabels, playlists, excludePlaylists },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
     },

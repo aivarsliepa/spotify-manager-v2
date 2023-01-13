@@ -9,7 +9,7 @@ const SongListItem = ({ song }: { song: Song }) => {
     <div className="flex h-14 items-center gap-4 py-1 px-4 hover:bg-slate-200">
       <input type="checkbox" className="self-center" />
       <div className="flex h-full gap-4">
-        <img src={song.image} alt={song.name} className="h-full" />
+        <img src={song.image} alt={song.name} className="h-full object-cover" width={48} height={48} />
         <div className="self-center">
           {song.name} - {artists}
         </div>

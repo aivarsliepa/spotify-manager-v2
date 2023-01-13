@@ -10,11 +10,11 @@ const FilterPanel = () => {
 
   useEffect(() => {
     const params = new URLSearchParams();
-    params.append("label", "test");
-    params.append("label", "test2");
+    // params.append("labels", "test");
+    // params.append("labels", "test2");
 
     router.push(`/songs?${params.toString()}`, undefined, { shallow: true });
-  }, []);
+  }, [router]);
 
   const { data: labelData } = trpc.labels.getAll.useQuery();
 
