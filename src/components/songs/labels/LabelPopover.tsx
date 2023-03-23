@@ -16,21 +16,23 @@ const LabelPicker = ({ selectedLabels, songId }: Props) => {
 
   const { data } = trpc.labels.getAll.useQuery();
   const trpcUtils = trpc.useContext();
-  const invalidate = () => {
-    trpcUtils.songs.getById.invalidate({ id: songId });
-    trpcUtils.labels.getAll.invalidate();
-  };
 
   const connectToSong = trpc.labels.connectToSong.useMutation({
-    onSettled: invalidate,
+    onSettled: () => {
+      trpcUtils.songs.invalidate();
+    },
   });
+
   const disconnectSong = trpc.labels.disconnectSong.useMutation({
-    onSettled: invalidate,
+    onSettled: () => {
+      trpcUtils.songs.invalidate();
+    },
   });
 
   const createAndConnectToSong = trpc.labels.createAndConnectToSong.useMutation({
     onSettled: () => {
-      invalidate();
+      trpcUtils.labels.getAll.invalidate();
+      trpcUtils.songs.invalidate();
       setLabelInput("");
     },
   });

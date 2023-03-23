@@ -17,9 +17,7 @@ export const trpc = createTRPCNext<AppRouter>({
       transformer: superjson,
       queryClientConfig: {
         defaultOptions: {
-          queries: {
-            staleTime: 1000 * 60, // 1 minutes
-          },
+          queries: {},
         },
       },
       links: [

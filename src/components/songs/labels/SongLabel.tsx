@@ -13,7 +13,7 @@ const SongLabel = ({ label, songId }: Props) => {
   const trpcUtils = trpc.useContext();
   const disconnectSong = trpc.labels.disconnectSong.useMutation({
     onSettled: () => {
-      trpcUtils.songs.getById.invalidate({ id: songId });
+      trpcUtils.songs.invalidate();
     },
   });
 

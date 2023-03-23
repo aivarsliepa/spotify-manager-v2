@@ -3,29 +3,12 @@ import { trpc } from "../../utils/trpc";
 import OnEntry from "../OnEntry";
 import SongListItem from "./SongListItem";
 import SongsFilter from "./filter/SongsFilter";
-import { useRouter } from "next/router";
+import { useSongFilterSettings } from "../../hooks";
 
 const SongList = () => {
-  const router = useRouter();
+  const { excludeLabels, excludePlaylists, labels, playlists } = useSongFilterSettings();
 
-  const labels = router.query.labels ? (Array.isArray(router.query.labels) ? router.query.labels : [router.query.labels]) : [];
-  const excludeLabels = router.query.excludeLabels
-    ? Array.isArray(router.query.excludeLabels)
-      ? router.query.excludeLabels
-      : [router.query.excludeLabels]
-    : [];
-  const playlists = router.query.playlists
-    ? Array.isArray(router.query.playlists)
-      ? router.query.playlists
-      : [router.query.playlists]
-    : [];
-  const excludePlaylists = router.query.excludePlaylists
-    ? Array.isArray(router.query.excludePlaylists)
-      ? router.query.excludePlaylists
-      : [router.query.excludePlaylists]
-    : [];
-
-  const { data, isLoading, fetchNextPage } = trpc.songs.getInfinite.useInfiniteQuery(
+  const { data, fetchNextPage, refetch } = trpc.songs.getInfinite.useInfiniteQuery(
     { labels, excludeLabels, playlists, excludePlaylists },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
@@ -42,19 +25,17 @@ const SongList = () => {
             </OnEntry>
           );
         }
-
         return <SongListItem key={song.spotifyId} song={song} />;
       });
     });
   }, [fetchNextPage, data?.pages]);
 
-  if (!data || isLoading) {
-    return <div>Loading...</div>;
-  }
-
   return (
     <div>
       <SongsFilter />
+      <button onClick={() => refetch()} className="rounded-md p-2 hover:bg-slate-200 ">
+        REFETCH
+      </button>
       <div className="flex flex-col">{songs}</div>
     </div>
   );
