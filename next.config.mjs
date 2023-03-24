@@ -13,5 +13,17 @@ const config = {
     locales: ["en"],
     defaultLocale: "en",
   },
+  async rewrites() {
+    return {
+      fallback: [
+        {
+          source: "/:path*",
+          destination: "/_404/:path*",
+        },
+      ],
+      afterFiles: [],
+      beforeFiles: [],
+    };
+  },
 };
 export default config;
