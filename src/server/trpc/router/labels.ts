@@ -6,6 +6,10 @@ export const labelsRouter = router({
   getAll: protectedProcedure.query(({ ctx }) => {
     return ctx.prisma.label.findMany({
       where: { userId: ctx.session.user.id },
+      select: {
+        name: true,
+        id: true,
+      },
     });
   }),
   createAndConnectToSong: protectedProcedure
